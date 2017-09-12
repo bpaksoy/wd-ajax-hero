@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  const movies = [];
+  let movies = [];
 
   const renderMovies = function() {
     $('#listings').empty();
@@ -30,7 +30,7 @@
       $card.append($content);
 
       const $action = $('<div>').addClass('card-action center');
-      const $plot = $('<a>');
+      var $plot = $('<a>');
 
       $plot.addClass('waves-effect waves-light btn modal-trigger');
       $plot.attr('href', `#${movie.id}`);
@@ -57,4 +57,44 @@
   };
 
   // ADD YOUR CODE HERE
+  var searchForm = document.querySelector("form");
+
+  searchForm.addEventListener("submit", function(event){
+    event.preventDefault();
+
+
+   var searchTerm = document.querySelector("#search").value;
+   console.log("here is my searchTerm:", searchTerm)
+
+   if(searchTerm !== ""){
+     $.get("https://omdb-api.now.sh/?s="+searchTerm + "/", function(data){
+     console.log("here is my data", data)
+      // console.log(data.Search[0]);
+     movies.length = 0;
+      for(var i =0; i < data.Search.length; i++){
+          var movie = {};
+          movie.id = data.Search[i].imdbID;
+          movie.poster = data.Search[i].Poster;
+          movie.title = data.Search[i].Title;
+          movie.year = data.Search[i].Year;
+          movies.push(movie);
+
+       }
+
+       for(var j =0; j < movies.length; j++){
+          var movieId= movies[j].id;
+          $.get("https://omdb-api.now.sh/?i="+ movieId, function(data){
+            var movPlot = data["Plot"];
+            console.log("here is plot", movPlot); // prints out the plots
+             $(".modal-content").append(movPlot); // appends the same plot to all ??? Why???
+
+          });
+
+        }
+
+       renderMovies();
+     });
+    }
+  });
+
 })();
